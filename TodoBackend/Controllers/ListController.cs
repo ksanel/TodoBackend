@@ -28,7 +28,8 @@ namespace TodoBackend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<List>> GetListById(int id)
         {
-            return await _context.Lists.FindAsync(id);
+            // Return a single todo from the database as a json response
+            return Ok(await _context.Lists.FindAsync(id));
         }
 
         [HttpPost]
@@ -54,17 +55,17 @@ namespace TodoBackend.Controllers
             return NoContent();
         }
 
+        // GET api/list/{id}/todos
+        // params : limit, skip 
         [HttpGet("{id}/todos")]
-        public async Task<ActionResult<IEnumerable<Todo>>> GetTodosByListId(int id)
+        public async Task<ActionResult<List>> GetTodosByListId(int id, int limit = 10, int skip = 0)
         {
-            var list = await _context.Lists.FindAsync(id);
-            if (list == null)
-            {
-                return NotFound();
-            }
-
-            return await _context.Todos.Where(todo => todo.ListId == id).ToListAsync();
+            // Get all todos count
+            var count = await _context.Todos.Where(todo => todo.ListId == id).CountAsync();
+            // Return a list of todos from the database as a json response with count
+            return Ok(new { total = count, todos = await _context.Todos.Where(todo => todo.ListId == id).Skip(skip).Take(limit).ToListAsync() });
         }
+
 
         // Delete list and all todos in it
         [HttpDelete("{id}")]

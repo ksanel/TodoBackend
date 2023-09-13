@@ -19,12 +19,18 @@ namespace TodoBackend.Controllers
             _context = context;
         }
 
+        // GET api/todo 
+        // params : limit, skip
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Todo>>> GetTodos()
+        public async Task<ActionResult<List<Todo>>> GetTodos(int limit = 10, int skip = 0)
         {
-            // Return all todos from the database as a json response
-            return await _context.Todos.ToListAsync();
+            // Get all todos count
+            var count = await _context.Todos.CountAsync();
+            // Return a list of todos from the database as a json response with count
+            return Ok(new { total = count, todos = await _context.Todos.Skip(skip).Take(limit).ToListAsync() });
+
         }
+        
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Todo>> GetTodoById(int id)
