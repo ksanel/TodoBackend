@@ -22,7 +22,13 @@ namespace TodoBackend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<List>>> GetLists()
         {
-            return await _context.Lists.ToListAsync();
+            // if empty return empty json
+            if (await _context.Lists.CountAsync() == 0)
+            {
+                return Ok(new { total = 0, lists = new List<List>() });
+            }
+            // Return a list of list from the database as a json response
+            return Ok(new { total = await _context.Lists.CountAsync(), lists = await _context.Lists.ToListAsync() });
         }
 
         [HttpGet("{id}")]
